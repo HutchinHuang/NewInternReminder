@@ -1,8 +1,8 @@
 # -*- coding:utf-8 -*-
 # A module with functions about getting information from webs and checking updates
 import requests
-import lxml.html
-import lxml
+import re
+import time
 __all__ = ["get_sxs"]
 
 
@@ -33,19 +33,30 @@ def get_sxs(place=None, keyword="python", day=None, month=None, salary=None, deg
         search_url += "ch-" + str(remain) + "_"
     search_url += "?k={}".format(keyword)
     # There's also a parameter 'P' in the website's URL
-    # I don't know what it means now. Maybe you can help by sending me an Issue.
+    # It means Pages of Searching results if there is more than one page.
+    # So we should judge at first whether there's more than one page of results.
     results = requests.get(search_url).text
-    tree = lxml.html.fromstring(results)
-    a_elements = tree.cssselect("div.po-name a")
-    link_set = set()
-    for element in a_elements:
-        link_set.add("http://www.shixiseng.com" + element.get("href"))
+    a = re.search(r'(\d+?)">尾页', results)
+    if a is None:  # Now there is only one page.
+        intern_href = re.findall(r'"(/intern.+?)"', results)
+        link_set = set()
+        for element in intern_href:
+            link_set.add("http://www.shixiseng.com" + element)
+    else:  # Now there is more than one page.
+        page_num = int(a.group(1))
+        link_set = set()
+        for page in range(page_num):
+            search_url_page = search_url + "&p={}".format(page)
+            results = requests.get(search_url_page).text
+            intern_href = re.findall(r'"(/intern/.+?)"', results)
+            for element in intern_href:
+                link_set.add("http://www.shixiseng.com" + element)
+            time.sleep(1)
     return link_set
 
 
 def test():
-    print(get_sxs())
-
+    print(get_sxs(place=110100, day=3))
 
 if __name__ == "__main__":
     test()
