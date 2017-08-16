@@ -18,6 +18,9 @@ def get_sxs(place=None, keyword="python", day=None, month=None, salary=None, deg
     :param remain: Whether possible or not for you to stay in the company as a full-time worker after this internship.
     :return: URLs of every searching results, in the form of a Python Set.
     """
+    # Firstly, use dictionaries to change the input numbers into correct form that can be used in the search_url.
+
+    # Then, modify the search_url according to those input numbers.
     search_url = "http://www.shixiseng.com/interns/"
     if place is not None:
         search_url += "c-" + str(place) + "_"  # "place" needs to be replaced after input
@@ -28,13 +31,13 @@ def get_sxs(place=None, keyword="python", day=None, month=None, salary=None, deg
     if month is not None:
         search_url += "m-" + str(month) + "_"
     if degree is not None:
-        search_url += "x-" + str(degree) + "_"  # salary needs to be replaced
+        search_url += "x-" + str(degree) + "_"  # degree needs to be replaced
     if remain is not None:
-        search_url += "ch-" + str(remain) + "_"
+        search_url += "ch-" + str(remain) + "_"  # remain needs to be replaced
     search_url += "?k={}".format(keyword)
-    # There's also a parameter 'P' in the website's URL
-    # It means Pages of Searching results if there is more than one page.
-    # So we should judge at first whether there's more than one page of results.
+    # Besides, there's also a parameter 'P' in the website's URL
+    # It means "Pages of Searching Results" if there is more than one page.
+    # So we should judge at first whether there's more than one page of results:
     results = requests.get(search_url).text
     a = re.search(r'(\d+?)">尾页', results)
     if a is None:  # Now there is only one page.
