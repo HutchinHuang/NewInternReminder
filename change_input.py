@@ -11,7 +11,7 @@ def get_city_code():
     :return: A dictionary with all city names as its key and corresponding city codes as its value.
     """
     html = requests.get("http://www.shixiseng.com/interns/").text
-    name_code_tuple = re.findall(r'<dd class="city_btn" data-val="(.+?)">(.+?)</dd>', html)
+    name_code_tuple = re.findall(r'<dd class="city_btn" data-val="(.+?)" *?>(.+?)</dd>', html)
     name_code_dict = {name_code_tuple[i][1]: name_code_tuple[i][0] for i in range(len(name_code_tuple))}
     name_code_dict["阿坝州"] = name_code_dict["阿坝藏族羌族自治州"]  # Reduce the length in order to make a button in the future.
     del name_code_dict["阿坝藏族羌族自治州"]
@@ -51,6 +51,8 @@ remain_dict = {
 
 if __name__ == "__main__":
     city_dict = get_city_code()
+    for key in city_dict:
+        print("'" + key + "'", end=", ")
     with shelve.open("shelve/para_change_dict") as slv:
         slv["city"] = city_dict
         slv["salary"] = salary_dict
