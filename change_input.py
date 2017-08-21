@@ -13,8 +13,7 @@ def get_city_code():
     html = requests.get("http://www.shixiseng.com/interns/").text
     name_code_tuple = re.findall(r'<dd class="city_btn" data-val="(.+?)" *?>(.+?)</dd>', html)
     name_code_dict = {name_code_tuple[i][1]: name_code_tuple[i][0] for i in range(len(name_code_tuple))}
-    name_code_dict["阿坝州"] = name_code_dict["阿坝藏族羌族自治州"]  # Reduce the length in order to make a button in the future.
-    del name_code_dict["阿坝藏族羌族自治州"]
+    name_code_dict["全国"] = None
     name_code_dict[""] = None  # If the input is "", It should be None.
     return name_code_dict
 
@@ -48,6 +47,27 @@ remain_dict = {
     "3": "notsure"
 }
 
+day_dict = {
+    "0": None,
+    "1": "1",
+    "2": "2",
+    "3": "3",
+    "4": "4",
+    "5": "5"
+}
+
+month_dict = {
+    "0": None,
+    "1": "1",
+    "2": "2",
+    "3": "3",
+    "4": "4",
+    "5": "5",
+    "6": "6",
+    "7": "8",
+    "8": "10",
+    "9": "12"
+}
 
 if __name__ == "__main__":
     city_dict = get_city_code()
@@ -58,3 +78,5 @@ if __name__ == "__main__":
         slv["salary"] = salary_dict
         slv["degree"] = degree_dict
         slv["remain"] = remain_dict
+        slv["day"] = day_dict
+        slv["month"] = month_dict
