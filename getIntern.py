@@ -3,6 +3,7 @@
 import requests
 import re
 import time
+from datetime import datetime
 import shelve
 import smtplib
 from email.mime.text import MIMEText
@@ -76,7 +77,7 @@ def get_sxs(place=None, keyword="python", day=None, month=None, salary=None, deg
     return link_set - old_set
 
 
-def send_mail(title, content, from_nick, from_name, from_code, to_nick, to_name):
+def send_mail(title="嗨！似乎出了点儿问题", content="您可以联系开发者pku_hhq@163.com", from_nick="大英雄", from_name="pku_hhq@163.com", from_code="kobe24", to_nick="Fighting!", to_name="pku_hhq@163.com"):
     flag = True  # A flag to mark whether the e-mail has been sent successfully
     try:
         msg = MIMEText(content, 'plain', 'utf-8')
@@ -93,8 +94,24 @@ def send_mail(title, content, from_nick, from_name, from_code, to_nick, to_name)
     return flag
 
 
+def send_intern_mail(keyword="python", place=None, day=None, month=None, salary=None, degree=None, remain=None, from_nick="大英雄", from_name="pku_hhq@163.com", from_code="kobe24", to_nick="Fighting!", to_name="pku_hhq@163.com"):
+    content_set = get_sxs(keyword=keyword, place=place, day=day, month=month, salary=salary, degree=degree, remain=remain)
+    if content_set:
+        title = "新的实习机会发布! --{0}年{1}月{2}日".format(datetime.now().year, datetime.now().month, datetime.now().day)
+        content_text = "尊敬的用户：\n\t您好！\n\t下列就是最近几天新加入的、符合您要求的实习机会：\n\n\t"
+        for item in content_set:
+            content_text += str(item) + "\n\n\t"
+        content_text += "感谢您的使用！祝您好运，早日找到心仪的实习机会。"
+    else:
+        title = "没有新的实习机会。 --{0}年{1}月{2}日".format(datetime.now().year, datetime.now().month, datetime.now().day)
+        content_text = "尊敬的用户：\n\t您好！\n\t最近没有新加入的、符合您要求的实习机会，还请您耐心等待。\n\t"
+        content_text += "衷心感谢您的使用！也祝您好运，早日找到心仪的实习机会。"
+    return_flag = send_mail(title=title, content=content_text, from_nick=from_nick, from_name=from_name, from_code=from_code, to_nick=to_nick, to_name=to_name)
+    return return_flag
+
+
 def test():
-    print(get_sxs(place=110100, day=3))
+    print(send_intern_mail(place=110100, day=3))
 
 if __name__ == "__main__":
     test()

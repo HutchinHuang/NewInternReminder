@@ -4,8 +4,9 @@ import wx
 import wx.adv
 import sys
 import shelve
+import time
 from datetime import datetime
-from getIntern import get_sxs, send_mail
+from getIntern import send_intern_mail
 
 # Use shelve to get parameter changing rules.
 # This shelve is created in file "change_input.py".
@@ -16,6 +17,7 @@ with shelve.open("shelve/para_change_dict") as slvFile:
     remain_dict = slvFile["remain"]
     day_dict = slvFile["day"]
     month_dict = slvFile["month"]
+    frequency_dict = slvFile["frequency"]
     
 
 class MyWindow(wx.Frame):
@@ -187,7 +189,7 @@ class MyPanel(wx.Panel):
     
     # No.7 frequency
     def combox_event_7(self, event):
-        self.frequency = str(event.GetInt())
+        self.frequency = frequency_dict[str(event.GetInt())]
         self.frequency_word = event.GetString()
     
     # textBox No.1 keyword 
@@ -199,31 +201,30 @@ class MyPanel(wx.Panel):
         self.mail = event.GetString()
 
     def click_save(self, event):
-        print(self.city, self.day, self.month, self.salary, self.degree, self.remain, self.frequency)
-        print(self.key, self.mail)
+        # print(self.city, self.day, self.month, self.salary, self.degree, self.remain, self.frequency)
+        # print(self.key, self.mail)
         dlg = wx.MessageDialog(self, '第一封邮件即将发送！\n\n第一封邮件的内容将包括符合您要求的所有实习链接。\n\n今后，将会以{}的频率给您推送新增加的实习链接。'.format(self.frequency_word),
                                '请您再次确认邮件地址：{}'.format(self.mail),
                                style=wx.OK | wx.CANCEL
                                )
         if dlg.ShowModal() == wx.ID_OK:  # "OK" is clicked.
-            content_set = get_sxs(keyword=self.key, place=self.city, day=self.day, month=self.month, salary=self.salary, degree=self.degree, remain=self.remain)
-            if content_set:
-                title = "新的实习机会发布! --{0}年{1}月{2}日".format(datetime.now().year, datetime.now().month, datetime.now().day)
-                content_text = "尊敬的用户：\n\t您好！\n\t下列就是最近几天新加入的、符合您要求的实习机会：\n\n\t"
-                for item in content_set:
-                    content_text += str(item) + "\n\n\t"
-                content_text += "感谢您的使用！祝您好运，早日找到心仪的实习机会。"
-            else:
-                title = "没有新的实习机会。 --{0}年{1}月{2}日".format(datetime.now().year, datetime.now().month, datetime.now().day)
-                content_text = "尊敬的用户：\n\t您好！\n\t最近没有新加入的、符合您要求的实习机会，还请您耐心等待。\n\t"
-                content_text += "衷心感谢您的使用！也祝您好运，早日找到心仪的实习机会。"
-            return_flag = send_mail(title, content_text, "大英雄和清", "pku_hhq@163.com", "kobe24", "陶源", self.mail)
+            return_flag = send_intern_mail(keyword=self.key, place=self.city, day=self.day, month=self.month, salary=self.salary, degree=self.degree, remain=self.remain, from_nick="大英雄", from_name="pku_hhq@163.com", from_code="kobe24", to_nick="Fighting!", to_name="pku_hhq@163.com")
             if return_flag:  # The e-mail has been sent successfully.
                 dlg_true = wx.MessageDialog(self, '第一封邮件已经发送成功！还请您稍后查收。', 'Yeah!!!', style=wx.OK)
                 dlg_true.ShowModal()
                 dlg_true.Destroy()
+                dlg.Destroy()  # Turn the dialogue off before looping to send emails every week or every several days.
+
+                while True:  # Send emails by certain frequency.
+                    time.sleep(1800 * self.frequency)  # One day has 86400 seconds.
+                    new_flag = send_intern_mail(keyword=self.key, place=self.city, day=self.day, month=self.month, salary=self.salary, degree=self.degree, remain=self.remain, from_nick="大英雄", from_name="pku_hhq@163.com", from_code="kobe24", to_nick="Fighting!", to_name="pku_hhq@163.com")
+                    if not new_flag:  # The email has not been sent successfully.
+                        dlg_false = wx.MessageDialog(self, '非常抱歉，邮件发送失败了！您可以尝试再次点击发送按钮重新发送，或联络开发者：pku_hhq@163.com。', 'Oops!!!', style=wx.OK)
+                        dlg_false.ShowModal()
+                        dlg_false.Destroy()
+                        break
             else:
-                dlg_false = wx.MessageDialog(self, '非常抱歉，第一封邮件发送失败！您可以联络开发者：pku_hhq@163.com。', 'Oops!!!', style=wx.OK)
+                dlg_false = wx.MessageDialog(self, '非常抱歉，第一封邮件发送失败！您可以尝试重新发送或者联络开发者：pku_hhq@163.com。', 'Oops!!!', style=wx.OK)
                 dlg_false.ShowModal()
                 dlg_false.Destroy()
         dlg.Destroy()

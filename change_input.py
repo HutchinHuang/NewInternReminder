@@ -69,6 +69,12 @@ month_dict = {
     "9": "12"
 }
 
+frequency_dict = {
+    "0": 1,
+    "1": 3,
+    "2": 7
+}
+
 if __name__ == "__main__":
     city_dict = get_city_code()
     for key in city_dict:
@@ -80,3 +86,4 @@ if __name__ == "__main__":
         slv["remain"] = remain_dict
         slv["day"] = day_dict
         slv["month"] = month_dict
+        slv["frequency"] = frequency_dict
