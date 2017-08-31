@@ -8,6 +8,8 @@ import time
 from datetime import datetime
 from getIntern import send_intern_mail
 
+seconds_per_day = 86400  # Define a constant value
+
 # Use shelve to get parameter changing rules.
 # This shelve is created in file "change_input.py".
 with shelve.open("shelve/para_change_dict") as slvFile:
@@ -216,7 +218,7 @@ class MyPanel(wx.Panel):
                 dlg.Destroy()  # Turn the dialogue off before looping to send emails every week or every several days.
 
                 while True:  # Send emails by certain frequency.
-                    time.sleep(1800 * self.frequency)  # One day has 86400 seconds.
+                    time.sleep(seconds_per_day * self.frequency)  # One day has 86400 seconds.
                     new_flag = send_intern_mail(keyword=self.key, place=self.city, day=self.day, month=self.month, salary=self.salary, degree=self.degree, remain=self.remain, from_nick="大英雄", from_name="pku_hhq@163.com", from_code="kobe24", to_nick="Fighting!", to_name="pku_hhq@163.com")
                     if not new_flag:  # The email has not been sent successfully.
                         dlg_false = wx.MessageDialog(self, '非常抱歉，邮件发送失败了！您可以尝试再次点击发送按钮重新发送，或联络开发者：pku_hhq@163.com。', 'Oops!!!', style=wx.OK)
